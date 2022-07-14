@@ -1,6 +1,6 @@
 let neurons = [];
 let index = null;
-let dampening = 1.03 ;
+let dampening = 1.1 ;
 
 function setup(){
   createCanvas(windowWidth,windowHeight);
@@ -9,8 +9,8 @@ function setup(){
 function draw(){
   background(255,255,255);
   for (let i = 0; i < neurons.length; i++) {
-    neurons[i].display();
     neurons[i].move();
+    neurons[i].display();
   }
 }
 
