@@ -1,11 +1,10 @@
 class neuron{
 
-  constructor(snap, e, x, y) {
-    this.x = x;
-    this.y = y;
-    this.event = e;
+  constructor(snap, x, y) {
     this.snap = snap;
     this.circle;
+    this.x = 0;
+    this.y = 0;
     this.hook = false;
     this.pushed = false;
     this.velocityX = 0.0;
@@ -17,19 +16,16 @@ class neuron{
     this.diffX = 0;
     this.diffY = 0;
 
-    this.circle = this.snap.circle(this.x, this.y, this.radius);
-    this.circle.drag(move);
-
-    var move = function() {
-      var dx = this.x - e.clientX;
-      var dy = this.y - e.clientY;
-
-      this.x = this.x + dx;
-      this.y = this.y + dy;
-    }
+    this.circle = this.snap.circle(x, y, this.radius);
   }
 
-  
+  move(x,y){
+    var dx = x - this.circle.getBBox().cx;
+    var dy = y - this.circle.getBBox().cy;
+    
+    
+    this.circle.attr({cx: this.circle.getBBox().cx - dx/6, cy: this.circle.getBBox().cy - dy/6});
+  }
 
   display() {
   }
