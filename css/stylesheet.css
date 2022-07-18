@@ -4,7 +4,7 @@
     box-sizing: border-box;
 }
 
-#root {
+#canvas {
     position: absolute;
     top: 0;
     right: 0;

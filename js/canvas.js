@@ -1,14 +1,23 @@
 var mouseX = 0;
 var mouseY = 0;
+var pmouseX = 0;
+var pmouseY = 0;
+var dmouseX = 0;
+var dmouseY = 0;
 var mousedown = false;
 var hooked = null;
 var objects = [];
 
+window.addEventListener("load", () => {
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+});
+
 window.addEventListener("resize", () => {
     if(window.innerHeight >= ctx.canvas.height)
-        ctx.canvas.height = window.innerHeight;
+        canvas.height = window.innerHeight;
     if(window.innerWidth >= ctx.canvas.width)
-        ctx.canvas.width = window.innerWidth;
+        canvas.width = window.innerWidth;
 });
 
 window.addEventListener('keydown', (e) => {
@@ -38,7 +47,7 @@ $(document).keydown(function(event) {
          }
     });
 
-document.getElementById('root').addEventListener('wheel', event => {
+document.getElementById('canvas').addEventListener('wheel', event => {
     if (event.ctrlKey) {
         event.preventDefault()
     }
@@ -46,12 +55,16 @@ document.getElementById('root').addEventListener('wheel', event => {
     
 
 function update(){
-    ctx.clearRect(0, 0, ctx.canvas.height, ctx.canvas.width);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < objects.length; i++) {
         if(hooked === null) {
-            if(objects[i].hooked)
+            if(objects[i].hook)
                 hooked = i;
+        }else if(objects[i].hook && (i !== hooked)){
+            objects[i].hook = false;
         }
+        if(hooked !== null) console.log(hooked);
+        objects[i].move(mouseX, mouseY, dmouseX, dmouseY);
         objects[i].draw();
     }
     requestAnimationFrame(update);
@@ -59,7 +72,5 @@ function update(){
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");  
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
 
 update();
