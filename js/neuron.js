@@ -20,6 +20,10 @@ class neuron{
 
   }
 
+  collision(i){
+
+  }
+
   move(x, y, dmouseX, dmouseY){
 
     this.dist = Math.hypot(this.x - x, this.y - y);
@@ -31,6 +35,7 @@ class neuron{
     this.px = this.x;
     this.py = this.y;
     
+
     if(this.hook){
       this.diffX = this.x - x;
       this.diffY = this.y - y;
@@ -46,6 +51,10 @@ class neuron{
       this.velocityY = this.velocityY/dampening;
     }
 
+    if(this.y - this.radius - 2 <= 0) this.velocityY = Math.abs(this.velocityY);
+    if(this.y + this.radius + 2 > this.ctx.canvas.height) this.velocityY = Math.abs(this.velocityY) * -1;
+    if(this.x - this.radius - 2 <= 0) this.velocityX = Math.abs(this.velocityX);
+    if(this.x + this.radius + 2 > this.ctx.canvas.width) this.velocityX = Math.abs(this.velocityX) * -1;
 
   }
 
