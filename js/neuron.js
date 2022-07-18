@@ -46,6 +46,7 @@ class neuron{
       this.velocityY = this.velocityY/dampening;
     }
 
+
   }
 
   draw() {
