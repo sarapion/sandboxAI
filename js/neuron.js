@@ -5,6 +5,8 @@ class neuron{
     this.circle;
     this.x = x;
     this.y = y;
+    this.px = x;
+    this.py = y;
     this.hook = false;
     this.pushed = false;
     this.velocityX = 0.0;
@@ -20,18 +22,28 @@ class neuron{
 
   move(x, y, dmouseX, dmouseY){
 
+    this.dist = Math.hypot(this.x - x, this.y - y);
     if(mousedown && (this.dist <= this.radius+2) && !this.hook && (hooked === null)) {
+      //console.log(hooked);
       this.hook = true;
     }
 
+    this.px = this.x;
+    this.py = this.y;
+    
     if(this.hook){
-      this.dist = Math.hypot(this.x - x, this.y - y);
       this.diffX = this.x - x;
       this.diffY = this.y - y;
       this.x = this.x - this.diffX/5;
       this.y = this.y - this.diffY/5;
+      this.velocityX = this.x - this.px;
+      this.velocityY = this.y - this.py;
     } else{
+      this.x = this.x + this.velocityX;
+      this.y = this.y + this.velocityY;
       
+      this.velocityX = this.velocityX/dampening;
+      this.velocityY = this.velocityY/dampening;
     }
 
   }

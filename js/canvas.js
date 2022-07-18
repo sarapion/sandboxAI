@@ -7,6 +7,7 @@ var dmouseY = 0;
 var mousedown = false;
 var hooked = null;
 var objects = [];
+const dampening = 1.05;
 
 window.addEventListener("load", () => {
     canvas.height = window.innerHeight;
@@ -63,7 +64,6 @@ function update(){
         }else if(objects[i].hook && (i !== hooked)){
             objects[i].hook = false;
         }
-        if(hooked !== null) console.log(hooked);
         objects[i].move(mouseX, mouseY, dmouseX, dmouseY);
         objects[i].draw();
     }
