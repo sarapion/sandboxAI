@@ -7,7 +7,8 @@ var dmouseY = 0;
 var mousedown = false;
 var hooked = null;
 var objects = [];
-const dampening = 1.05;
+const dampening = 1;
+const elapsedTime = 1000/60;
 
 window.addEventListener("load", () => {
     canvas.height = window.innerHeight;
@@ -15,9 +16,7 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("resize", () => {
-    if(window.innerHeight >= ctx.canvas.height)
         canvas.height = window.innerHeight;
-    if(window.innerWidth >= ctx.canvas.width)
         canvas.width = window.innerWidth;
 });
 
@@ -32,12 +31,14 @@ window.addEventListener('mousedown', (e) => {
 
 window.addEventListener('mouseup', (e) => {
     mousedown = false;
-    if(hooked !== null)
-        objects[hooked].hook = false;
+    for (let index = 0; index < objects.length; index++)
+        objects[index].hook = false;
     hooked = null;
 });
 
 window.addEventListener('mousemove', (e) => {
+    pmouseX = mouseX;
+    pmouseY = mouseY;
     mouseX = e.clientX;
     mouseY = e.clientY;
 });
@@ -55,6 +56,15 @@ document.getElementById('canvas').addEventListener('wheel', event => {
     }, true)
     
 
+function canHook(neuron){
+    for (let i = 0; i < objects.length; i++) {
+        if((objects[i].hook === true) && (objects[i] !== neuron)){
+            return false;
+        }
+    }
+    return true;
+}
+
 function update(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < objects.length; i++) {
@@ -64,7 +74,7 @@ function update(){
         }else if(objects[i].hook && (i !== hooked)){
             objects[i].hook = false;
         }
-        objects[i].move(mouseX, mouseY, dmouseX, dmouseY);
+        objects[i].move(i);
         objects[i].draw();
     }
     requestAnimationFrame(update);
