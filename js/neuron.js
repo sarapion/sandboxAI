@@ -25,7 +25,7 @@ class neuron{
 
   move(j){
 
-    if(mousedown && ((Math.hypot(this.x - mouseX, this.y - mouseY) <= this.radius+2) || this.hook)){
+    if(hoveringC(this)){
       if(canHook(this)){
         this.diffX = this.x - mouseX;
         this.diffY = this.y - mouseY;
@@ -36,6 +36,7 @@ class neuron{
         this.hook = true;
       }
     } 
+
     if(this.hook){
       this.vx = (this.x-this.px);
       this.vy = (this.y-this.py);
@@ -96,10 +97,10 @@ class neuron{
     this.vx = this.vx  * dampening;
     this.vy = this.vy  * dampening;
 
-    if(Math.abs(this.vx+this.vy) <= 0.01) {
+    /*if(Math.abs(this.vx+this.vy) <= 0.01) {
       this.vx = 0;
       this.vy = 0;
-    } 
+    }*/ 
 
     this.px = this.x;
     this.py = this.y;
