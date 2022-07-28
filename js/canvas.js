@@ -5,7 +5,9 @@ var pmouseY = 0;
 var dmouseX = 0;
 var dmouseY = 0;
 var mousedown = false;
+var mousedownRight = false;
 var hooked = null;
+var connecting = null;
 var objects = [];
 var lines = [];
 const dampening = 0.99;
@@ -14,6 +16,7 @@ var testMenu;
 window.addEventListener("load", () => {
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
+    document.body.style.overflow = 'hidden';
 
     testMenu = new menu(ctx);
 });
@@ -24,7 +27,19 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener('mousedown', (e) => {
-    mousedown = true;
+    switch (e.button) {
+        case 0:
+            mousedown = true;
+            break;
+        case 1:
+            break;
+        case 2:
+            mousedownRight = true;
+            connecting = lines.length -1;
+            break;
+        default:
+            alert('You have a strange Mouse!');
+    }
 });
 
 window.addEventListener('mouseup', (e) => {
@@ -32,6 +47,8 @@ window.addEventListener('mouseup', (e) => {
     for (let index = 0; index < objects.length; index++)
         objects[index].hook = false;
     hooked = null;
+    connecting = null;
+    mousedownRight = false;
 });
 
 window.addEventListener('mousemove', (e) => {
@@ -56,7 +73,7 @@ document.getElementById('canvas').addEventListener('wheel', event => {
     }, true)
     
 function hoveringC(object){
-    if(mousedown && ((Math.hypot(object.x - mouseX, object.y - mouseY) <= object.radius+2) || object.hook))
+    if(((Math.hypot(object.x - mouseX, object.y - mouseY) <= object.radius+2) || object.hook))
         return true;
     return false
 }
@@ -84,8 +101,20 @@ document.body.onkeydown = function(e){
     }
 }
 
+function searchOpenConnection(){
+    for (let i = 0; i < lines.length; i++) {
+        if(lines[i].connecting)
+            return lines[i];
+    }
+    return null;
+}
+
 function update(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < lines.length; i++) {
+        lines[i].draw();
+        lines[i].move(mouseX, mouseY);
+    }
     for (let i = 0; i < objects.length; i++) {
         if(hooked === null) {
             if(objects[i].hook)
@@ -97,11 +126,11 @@ function update(){
         objects[i].draw();
         testMenu.refresh();
     }
-    //console.log(hooked);
     requestAnimationFrame(update);
 }
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");  
+ctx.translate(0.5, 0.5);
 
 update();

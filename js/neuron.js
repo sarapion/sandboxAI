@@ -3,6 +3,7 @@ class neuron{
   constructor(context, x, y) {
     this.ctx = context;
     this.circle;
+    this.connection = null;
     this.x = x;
     this.y = y;
     this.px = x;
@@ -20,13 +21,14 @@ class neuron{
     this.normVY = 0;
     this.diffX = 0;
     this.diffY = 0;
+    this.menuMember = false;
 
   }
 
   move(j){
 
-    if(hoveringC(this)){
-      if(canHook(this)){
+    if(hoveringC(this) && mousedown && !mousedownRight){
+      if(canHook(this)  ){
         this.diffX = this.x - mouseX;
         this.diffY = this.y - mouseY;
         this.px = this.x;
@@ -34,8 +36,23 @@ class neuron{
         this.x = this.x - this.diffX/5;
         this.y = this.y - this.diffY/5;
         this.hook = true;
+      } 
+    } else if(hoveringC(this) && !mousedown && mousedownRight){
+      var tempLine = searchOpenConnection();
+      if(this.connection === null && tempLine === null){
+        var line = new connection(this.ctx, this.x, this.y, this);
+        line.connecting = true;
+        lines.push(line);
+        this.connection = line;
+        console.log("Mouse tracking");
       }
-    } 
+      if(tempLine !== null && this.connection === null){
+        console.log("Ball tracking");
+        tempLine.connecting = false;
+        this.connection = tempLine;
+        tempLine.neuron2 = this;
+      }
+    }
 
     if(this.hook){
       this.vx = (this.x-this.px);
@@ -45,19 +62,22 @@ class neuron{
     var collisionVector = [];
     for (let i = 0; i < objects.length; i++) {
       if(j === i) continue;
+        if(!objects[i].menuMember){
       if(this.doOverlap(this.x, this.y, this.radius, objects[i].x, objects[i].y, objects[i].radius)){
-        collisionVector.push([this, objects[i]]);
 
-        let distance = Math.sqrt((this.x-objects[i].x)*(this.x-objects[i].x)+(this.y-objects[i].y)*(this.y-objects[i].y));
-        let overlap = 0.5*(distance - this.radius - objects[i].radius);
-        
-        this.px = this.x;
-        this.py = this.y;
-        this.x = this.x - overlap*(this.x-objects[i].x)/distance;
-        this.y = this.y - overlap*(this.y-objects[i].y)/distance;
+          collisionVector.push([this, objects[i]]);
 
-        objects[i].x = objects[i].x + overlap*(this.x-objects[i].x)/distance;
-        objects[i].y = objects[i].y + overlap*(this.y-objects[i].y)/distance;
+          let distance = Math.sqrt((this.x-objects[i].x)*(this.x-objects[i].x)+(this.y-objects[i].y)*(this.y-objects[i].y));
+          let overlap = 0.5*(distance - this.radius - objects[i].radius);
+          
+          this.px = this.x;
+          this.py = this.y;
+          this.x = this.x - overlap*(this.x-objects[i].x)/distance;
+          this.y = this.y - overlap*(this.y-objects[i].y)/distance;
+
+          objects[i].x = objects[i].x + overlap*(this.x-objects[i].x)/distance;
+          objects[i].y = objects[i].y + overlap*(this.y-objects[i].y)/distance;
+        }
       }
     }
 
@@ -97,10 +117,10 @@ class neuron{
     this.vx = this.vx  * dampening;
     this.vy = this.vy  * dampening;
 
-    /*if(Math.abs(this.vx+this.vy) <= 0.01) {
+    if(Math.abs(this.vx+this.vy) <= 0.01) {
       this.vx = 0;
       this.vy = 0;
-    }*/ 
+    }
 
     this.px = this.x;
     this.py = this.y;
@@ -108,10 +128,10 @@ class neuron{
     this.y = this.y + this.vy;
 
     if(!this.hook){
-      if(this.x > this.ctx.canvas.width) this.vx = -1;
-      if(this.x < 0) this.vx = 1;
+      if(this.x > this.ctx.canvas.width && (this.vx === 0)) this.vx = -1;
+      if(this.x < 0 && (this.vx === 0)) this.vx = 1;
       if((this.y > this.ctx.canvas.height) && (this.vy === 0)) this.vy = -1;
-      if(this.x < 0) this.vy = -1;
+      if(this.y < 0 && (this.vy === 0)) this.vy = -1;
     }
 
   }
@@ -121,11 +141,13 @@ class neuron{
   }
 
   draw() {
-    this.ctx.fillStyle = "black";
+    this.ctx.fillStyle = "white";
     this.ctx.beginPath();
     this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     this.ctx.closePath();
-    this.ctx.lineWidth=5;
+    this.ctx.lineWidth=10;
     this.ctx.stroke();
+    this.ctx.fill();
+
   }
 }
