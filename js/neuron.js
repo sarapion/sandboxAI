@@ -3,7 +3,8 @@ class neuron{
   constructor(context, x, y) {
     this.ctx = context;
     this.circle;
-    this.connection = null;
+    this.connection = [];
+    this.connecting = false;
     this.x = x;
     this.y = y;
     this.px = x;
@@ -38,19 +39,24 @@ class neuron{
         this.hook = true;
       } 
     } else if(hoveringC(this) && !mousedown && mousedownRight){
+      mousedownRight = false;
       var tempLine = searchOpenConnection();
-      if(this.connection === null && tempLine === null){
+      console.log(this.connecting);
+      if(tempLine === null && !this.connecting){
         var line = new connection(this.ctx, this.x, this.y, this);
         line.connecting = true;
         lines.push(line);
-        this.connection = line;
+        this.connecting = true;
+        this.connection.push(line);
         console.log("Mouse tracking");
-      }
-      if(tempLine !== null && this.connection === null){
-        console.log("Ball tracking");
-        tempLine.connecting = false;
-        this.connection = tempLine;
-        tempLine.neuron2 = this;
+      }else if(tempLine !== null && !this.connecting){
+        if(tempLine.connecting){
+          console.log("Ball tracking");
+          tempLine.connecting = false;
+          this.connection.push(tempLine);
+          tempLine.neuron2 = this;
+          tempLine.neuron.connecting = false;
+        }
       }
     }
 

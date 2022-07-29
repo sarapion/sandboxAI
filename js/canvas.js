@@ -10,7 +10,7 @@ var hooked = null;
 var connecting = null;
 var objects = [];
 var lines = [];
-const dampening = 0.99;
+const dampening = 0.95;
 var testMenu;
 
 window.addEventListener("load", () => {
