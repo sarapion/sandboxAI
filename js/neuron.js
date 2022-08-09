@@ -51,11 +51,13 @@ class neuron{
         console.log("Mouse tracking");
       }else if(tempLine !== null && !this.connecting){
         if(tempLine.connecting){
-          console.log("Ball tracking");
-          tempLine.connecting = false;
-          this.connection.push(tempLine);
-          tempLine.neuron2 = this;
-          tempLine.neuron.connecting = false;
+          if(!this.alreadyConnected(tempLine.neuron, this)){
+            console.log("Ball tracking");
+            tempLine.connecting = false;
+            this.connection.push(tempLine);
+            tempLine.neuron2 = this;
+            tempLine.neuron.connecting = false;
+          }
         }
       }
     }
@@ -142,6 +144,13 @@ class neuron{
 
   }
 
+  alreadyConnected(neuronA, neuronB){
+    if(neuronA !== undefined)
+      for (let i = 0; i < neuronA.connection.length; i++)
+        if((neuronA.connection[i].neuron2 === neuronB) || (neuronA.connection[i].neuron === neuronB)) return true;
+    return false;
+  }
+
   doOverlap(x1, y1, r1, x2, y2, r2){
     return ((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) <= (r1+r2)*(r1+r2);
   }
@@ -149,7 +158,7 @@ class neuron{
   draw() {
     this.ctx.fillStyle = "white";
     this.ctx.beginPath();
-    this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    this.ctx.arc(this.x, this.y, this.radius-3, 0, Math.PI * 2);
     this.ctx.closePath();
     this.ctx.lineWidth=10;
     this.ctx.stroke();

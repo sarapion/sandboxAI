@@ -10,7 +10,7 @@ var hooked = null;
 var connecting = null;
 var objects = [];
 var lines = [];
-const dampening = 0.95;
+const dampening = 0.9;
 var testMenu;
 
 window.addEventListener("load", () => {
@@ -113,7 +113,6 @@ function update(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < lines.length; i++) {
         lines[i].draw();
-        lines[i].move(mouseX, mouseY);
     }
     for (let i = 0; i < objects.length; i++) {
         if(hooked === null) {
@@ -125,6 +124,9 @@ function update(){
         objects[i].move(i);
         objects[i].draw();
         testMenu.refresh();
+    }
+    for (let i = 0; i < lines.length; i++) {
+        lines[i].move(mouseX, mouseY);
     }
     requestAnimationFrame(update);
 }
