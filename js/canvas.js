@@ -10,7 +10,8 @@ var hooked = null;
 var connecting = null;
 var objects = [];
 var lines = [];
-const dampening = 0.9;
+var refreshIntervalId = null;
+const dampening = 0.89;
 var testMenu;
 
 window.addEventListener("load", () => {
@@ -43,12 +44,22 @@ window.addEventListener('mousedown', (e) => {
 });
 
 window.addEventListener('mouseup', (e) => {
-    mousedown = false;
     for (let index = 0; index < objects.length; index++)
         objects[index].hook = false;
     hooked = null;
     connecting = null;
-    mousedownRight = false;
+    switch (e.button) {
+        case 0:
+            mousedown = false;
+            break;
+        case 1:
+            break;
+        case 2:
+            mousedownRight = false;
+            break;
+        default:
+            alert('You have a strange Mouse!');
+    }
 });
 
 window.addEventListener('mousemove', (e) => {
@@ -57,6 +68,7 @@ window.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
 });
+
 
 window.addEventListener("contextmenu", e => e.preventDefault());
 
@@ -111,7 +123,11 @@ function searchOpenConnection(){
 
 function update(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < objects.length; i++) {
+        objects[i].move(i);
+    }
     for (let i = 0; i < lines.length; i++) {
+        lines[i].move(mouseX, mouseY);
         lines[i].draw();
     }
     for (let i = 0; i < objects.length; i++) {
@@ -121,18 +137,28 @@ function update(){
         }else if(objects[i].hook && (i !== hooked)){
             objects[i].hook = false;
         }
-        objects[i].move(i);
+        
         objects[i].draw();
         testMenu.refresh();
-    }
-    for (let i = 0; i < lines.length; i++) {
-        lines[i].move(mouseX, mouseY);
     }
     requestAnimationFrame(update);
 }
 
+/*window.addEventListener('visibilitychange', (e) => {
+    if(refreshIntervalId === null){
+        console.log("setInterval", refreshIntervalId);
+        refreshIntervalId = setInterval(update, 250);
+    }
+    else{
+        console.log("clearInterval", refreshIntervalId);
+        clearInterval(refreshIntervalId);
+        refreshIntervalId = null;
+    }
+ });*/
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");  
 ctx.translate(0.5, 0.5);
+//setInterval(update, 16);
 
 update();

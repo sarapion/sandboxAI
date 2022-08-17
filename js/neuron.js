@@ -11,6 +11,8 @@ class neuron{
     this.py = y;
     this.vx = 0;
     this.vy = 0;
+    this.vxConnection = 0;
+    this.vyConnection = 0;
     this.ax = 0;
     this.ay = 0;
     this.hook = false;
@@ -28,6 +30,13 @@ class neuron{
 
   move(j){
 
+    if(this.connecting && !mousedownRight){
+      this.connecting = false;
+      lines.pop();
+      console.log("Test");
+    }
+
+
     if(hoveringC(this) && mousedown && !mousedownRight){
       if(canHook(this)  ){
         this.diffX = this.x - mouseX;
@@ -39,7 +48,7 @@ class neuron{
         this.hook = true;
       } 
     } else if(hoveringC(this) && !mousedown && mousedownRight){
-      mousedownRight = false;
+      //mousedownRight = false;
       var tempLine = searchOpenConnection();
       console.log(this.connecting);
       if(tempLine === null && !this.connecting){
@@ -57,6 +66,7 @@ class neuron{
             this.connection.push(tempLine);
             tempLine.neuron2 = this;
             tempLine.neuron.connecting = false;
+            mousedownRight = false;
           }
         }
       }
@@ -89,7 +99,47 @@ class neuron{
       }
     }
 
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      var LineX1 = line.endX - line.startX;
+      var LineY1 = line.endY - line.startY;
+
+      var LineX2 = this.x - line.startX;
+      var LineY2 = this.y - line.startY;
+
+      var Edgelength = LineX1 * LineX1 + LineY1 * LineY1;
+      var t = Math.max(0, Math.min(Edgelength , LineX2 * LineX1 + LineY1 * LineY2))/Edgelength;
+
+      var ClosestPointX = line.startX + t * LineX1;
+      var ClosestPointY = line.startY + t * LineY1;
+
+      var distanceLine = Math.sqrt((this.x-ClosestPointX)*(this.x-ClosestPointX)+(this.y-ClosestPointY)*(this.y-ClosestPointY));
+
+      var nxClose = (ClosestPointX - this.x)/distanceLine;
+      var nyClose = (ClosestPointY - this.y)/distanceLine;
+
+      if(distanceLine <= this.radius+5 && line.neuron !== this && line.neuron2 !== this && !line.neuron.connecting){
+
+        if(!this.hook){
+          this.x = this.x - nxClose*(this.radius-distanceLine+5);
+          this.y = this.y - nyClose*(this.radius-distanceLine+5);
+        }else{
+          line.neuron.x = line.neuron.x + nxClose*(this.radius-distanceLine+5);
+          line.neuron.y = line.neuron.y + nyClose*(this.radius-distanceLine+5);
+          line.neuron2.x = line.neuron2.x + nxClose*(this.radius-distanceLine+5);
+          line.neuron2.y = line.neuron2.y + nyClose*(this.radius-distanceLine+5);
+          line.startX = line.startX + nxClose*(this.radius-distanceLine+5);
+          line.startY = line.startY + nyClose*(this.radius-distanceLine+5);
+          line.endX = line.endX + nxClose*(this.radius-distanceLine+5);
+          line.endY = line.endY + nyClose*(this.radius-distanceLine+5);
+        }
+      }
+    }
+
     for (let i = 0; i < collisionVector.length; i++) {
+
+      
+
       var b1 = collisionVector[i][0];
       var b2 = collisionVector[i][1];
 
@@ -116,11 +166,30 @@ class neuron{
       b2.vy = ty * dpTan2 + ny * m2;
     }
     
-    if(this.x - this.radius < 0) this.vx = Math.abs(this.vx);
-    if(this.x + this.radius >= this.ctx.canvas.width) this.vx = Math.abs(this.vx) * -1;
-    if(this.y - this.radius < 0) this.vy = Math.abs(this.vy);
-    if(this.y + this.radius >= this.ctx.canvas.height) this.vy = Math.abs(this.vy) * -1;
 
+    if(!this.hook){
+      if(this.x - this.radius < 0) this.vx = Math.abs(this.vx);
+      if(this.x + this.radius >= this.ctx.canvas.width) this.vx = Math.abs(this.vx) * -1;
+      if(this.y - this.radius < 0) this.vy = Math.abs(this.vy);
+      if(this.y + this.radius >= this.ctx.canvas.height) this.vy = Math.abs(this.vy) * -1;
+    } else {
+      if(this.x - this.radius < 0) {
+        this.x = this.radius;
+        this.vx = 0;
+      }
+      if(this.x + this.radius >= this.ctx.canvas.width) {
+        this.x = this.ctx.canvas.width-this.radius;
+        this.vx = 0;
+      }
+      if(this.y - this.radius < 0) {
+        this.y = this.radius;
+        this.vy = 0;
+      }
+      if(this.y + this.radius >= this.ctx.canvas.height) {
+        this.y = this.ctx.canvas.height-this.radius;
+        this.vy= 0;
+      }
+    }
 
     this.vx = this.vx  * dampening;
     this.vy = this.vy  * dampening;
@@ -130,18 +199,17 @@ class neuron{
       this.vy = 0;
     }
 
+    
     this.px = this.x;
     this.py = this.y;
-    this.x = this.x + this.vx;
-    this.y = this.y + this.vy;
+    this.x = this.x + this.vx + this.vxConnection;
+    this.y = this.y + this.vy + this.vyConnection;
 
-    if(!this.hook){
-      if(this.x > this.ctx.canvas.width && (this.vx === 0)) this.vx = -1;
-      if(this.x < 0 && (this.vx === 0)) this.vx = 1;
-      if((this.y > this.ctx.canvas.height) && (this.vy === 0)) this.vy = -1;
-      if(this.y < 0 && (this.vy === 0)) this.vy = -1;
-    }
+    this.vxConnection = 0;
+    this.vyConnection = 0;
 
+
+      //console.log(this.vx, this.vy);
   }
 
   alreadyConnected(neuronA, neuronB){
