@@ -53,11 +53,11 @@ class neuron{
         this.hook = true;
       } 
 
-      //Checking if hovering above Object and right Mouse is pressed
+      //Checking if hovering above Neuron and right Mouse is pressed
     } else if(hoveringC(this) && !mousedown && mousedownRight){
       var tempLine = searchOpenConnection();
 
-      //No line is currently being connected -> create new line starting at current object
+      //No line is currently being connected -> create new line starting at current Neuron
       if(tempLine === null && !this.connecting){
         var line = new connection(this.ctx, this.x, this.y, this);
         line.connecting = true;
@@ -66,7 +66,7 @@ class neuron{
         this.connection.push(line);
         console.log("Mouse tracking");
 
-      //
+      //Line is currently being connected and that lines end is above this Neuron
       }else if(tempLine !== null && !this.connecting){
         if(tempLine.connecting){
           if(!this.alreadyConnected(tempLine.neuron, this)){
@@ -81,7 +81,7 @@ class neuron{
       }
     }
 
-    //Updating Neuron velocity when Neuron is hooked by cursor
+    //Updating Neuron velocity when it's hooked by cursor
     if(this.hook){
       this.vx = (this.x-this.px);
       this.vy = (this.y-this.py);
