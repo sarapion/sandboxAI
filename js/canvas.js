@@ -11,9 +11,10 @@ var connecting = null;
 var objects = [];
 var lines = [];
 var refreshIntervalId = null;
-const dampening = 0.89;
+const dampening = 0.99;
 var testMenu;
 
+//This is called on tab load once
 window.addEventListener("load", () => {
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
@@ -22,11 +23,15 @@ window.addEventListener("load", () => {
     testMenu = new menu(ctx);
 });
 
+//Tracking window size
 window.addEventListener("resize", () => {
         canvas.height = window.innerHeight;
         canvas.width = window.innerWidth;
+        testMenu.resize();
 });
 
+
+//Tracking mouse clocks
 window.addEventListener('mousedown', (e) => {
     switch (e.button) {
         case 0:
@@ -43,6 +48,8 @@ window.addEventListener('mousedown', (e) => {
     }
 });
 
+
+//Saving mouse realeses
 window.addEventListener('mouseup', (e) => {
     for (let index = 0; index < objects.length; index++)
         objects[index].hook = false;
@@ -62,6 +69,7 @@ window.addEventListener('mouseup', (e) => {
     }
 });
 
+//Saving mouse coordinates
 window.addEventListener('mousemove', (e) => {
     pmouseX = mouseX;
     pmouseY = mouseY;
@@ -69,36 +77,41 @@ window.addEventListener('mousemove', (e) => {
     mouseY = e.clientY;
 });
 
-
+//Preventing Context Menu popup on mouse right click
 window.addEventListener("contextmenu", e => e.preventDefault());
 
+//Preventing control key action
 $(document).keydown(function(event) {
     if (event.ctrlKey==true && (event.which == '61' || event.which == '107' || event.which == '173' || event.which == '109'  || event.which == '187'  || event.which == '189'  ) ) {
             event.preventDefault();
          }
     });
-
 document.getElementById('canvas').addEventListener('wheel', event => {
     if (event.ctrlKey) {
         event.preventDefault()
     }
     }, true)
-    
+
+
+//Checking if Mouse is Hovering Object or not (for circular Objects only)
 function hoveringC(object){
     if(((Math.hypot(object.x - mouseX, object.y - mouseY) <= object.radius+2) || object.hook))
         return true;
     return false
 }
 
-function canHook(neuron){
+
+//Checking if Object is already hooked to mouse or not 
+function canHook(object){
     for (let i = 0; i < objects.length; i++) {
-        if((objects[i].hook === true) && (objects[i] !== neuron)){
+        if((objects[i].hook === true) && (objects[i] !== object)){
             return false;
         }
     }
     return true;
 }
 
+//(Temporary) Creating Neuron Object on SPACE Keypress
 document.body.onkeydown = function(e){
     if(e.keyCode == 32){
         for (let i = 0; i < objects.length; i++) {
@@ -113,6 +126,7 @@ document.body.onkeydown = function(e){
     }
 }
 
+//Search for a connection with one open end
 function searchOpenConnection(){
     for (let i = 0; i < lines.length; i++) {
         if(lines[i].connecting)
@@ -121,6 +135,7 @@ function searchOpenConnection(){
     return null;
 }
 
+//Update functions gets called 60 times a second (Only if current tab is open)
 function update(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < objects.length; i++) {
@@ -144,21 +159,9 @@ function update(){
     requestAnimationFrame(update);
 }
 
-/*window.addEventListener('visibilitychange', (e) => {
-    if(refreshIntervalId === null){
-        console.log("setInterval", refreshIntervalId);
-        refreshIntervalId = setInterval(update, 250);
-    }
-    else{
-        console.log("clearInterval", refreshIntervalId);
-        clearInterval(refreshIntervalId);
-        refreshIntervalId = null;
-    }
- });*/
-
+//Initializing canvas and calling update function
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");  
 ctx.translate(0.5, 0.5);
-//setInterval(update, 16);
 
 update();

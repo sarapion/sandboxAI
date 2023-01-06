@@ -30,27 +30,34 @@ class neuron{
 
   move(j){
 
+    //Remove unfinished connection on right Mouse release
     if(this.connecting && !mousedownRight){
       this.connecting = false;
       lines.pop();
       console.log("Test");
     }
 
-
+    //Check if mouse is hovering above Object
     if(hoveringC(this) && mousedown && !mousedownRight){
+
+      //Check if Object is already following cursor of not
       if(canHook(this)  ){
+
+        //Attaching Object to Mouse 
         this.diffX = this.x - mouseX;
         this.diffY = this.y - mouseY;
         this.px = this.x;
         this.py = this.y;
-        this.x = this.x - this.diffX/5;
-        this.y = this.y - this.diffY/5;
+        this.x = this.x - this.diffX/10;
+        this.y = this.y - this.diffY/10;
         this.hook = true;
       } 
+
+      //Checking if hovering above Object and right Mouse is pressed
     } else if(hoveringC(this) && !mousedown && mousedownRight){
-      //mousedownRight = false;
       var tempLine = searchOpenConnection();
-      console.log(this.connecting);
+
+      //No line is currently being connected -> create new line starting at current object
       if(tempLine === null && !this.connecting){
         var line = new connection(this.ctx, this.x, this.y, this);
         line.connecting = true;
@@ -58,6 +65,8 @@ class neuron{
         this.connecting = true;
         this.connection.push(line);
         console.log("Mouse tracking");
+
+      //
       }else if(tempLine !== null && !this.connecting){
         if(tempLine.connecting){
           if(!this.alreadyConnected(tempLine.neuron, this)){
@@ -72,11 +81,13 @@ class neuron{
       }
     }
 
+    //Updating Neuron velocity when Neuron is hooked by cursor
     if(this.hook){
       this.vx = (this.x-this.px);
       this.vy = (this.y-this.py);
     }
 
+    //Executing Neuron static collision
     var collisionVector = [];
     for (let i = 0; i < objects.length; i++) {
       if(j === i) continue;
@@ -99,6 +110,7 @@ class neuron{
       }
     }
 
+    //Calculating and executing Neuron collisions with connection edges (Many Bugs; Alot TODO)
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       var LineX1 = line.endX - line.startX;
@@ -120,10 +132,8 @@ class neuron{
 
       if(distanceLine <= this.radius+5 && line.neuron !== this && line.neuron2 !== this && !line.neuron.connecting){
 
-        if(!this.hook){
           this.x = this.x - nxClose*(this.radius-distanceLine+5);
           this.y = this.y - nyClose*(this.radius-distanceLine+5);
-        }else{
           line.neuron.x = line.neuron.x + nxClose*(this.radius-distanceLine+5);
           line.neuron.y = line.neuron.y + nyClose*(this.radius-distanceLine+5);
           line.neuron2.x = line.neuron2.x + nxClose*(this.radius-distanceLine+5);
@@ -132,13 +142,13 @@ class neuron{
           line.startY = line.startY + nyClose*(this.radius-distanceLine+5);
           line.endX = line.endX + nxClose*(this.radius-distanceLine+5);
           line.endY = line.endY + nyClose*(this.radius-distanceLine+5);
-        }
+        
       }
     }
 
-    for (let i = 0; i < collisionVector.length; i++) {
 
-      
+    //Executing Neuron elastic collistion
+    for (let i = 0; i < collisionVector.length; i++) {
 
       var b1 = collisionVector[i][0];
       var b2 = collisionVector[i][1];
@@ -166,12 +176,61 @@ class neuron{
       b2.vy = ty * dpTan2 + ny * m2;
     }
     
+    
+    //Adding friction
+    this.vx = this.vx  * dampening;
+    this.vy = this.vy  * dampening;
 
+    stopMoving();
+
+    //Changing object position depending on its velocity and the push/pull from connections
+    this.px = this.x;
+    this.py = this.y;
+    this.x = this.x + this.vx + this.vxConnection;
+    this.y = this.y + this.vy + this.vyConnection;
+
+    //Making the Objects bounce off window edges and not fly out
     if(!this.hook){
-      if(this.x - this.radius < 0) this.vx = Math.abs(this.vx);
-      if(this.x + this.radius >= this.ctx.canvas.width) this.vx = Math.abs(this.vx) * -1;
-      if(this.y - this.radius < 0) this.vy = Math.abs(this.vy);
-      if(this.y + this.radius >= this.ctx.canvas.height) this.vy = Math.abs(this.vy) * -1;
+      if(this.x - this.radius < 0){
+        if((this.vxConnection >= 0) || (this.vx >= 0)){
+          this.vx = Math.abs(this.vx);
+          this.x = this.radius;
+        }
+        else{
+          this.vx = 0;
+          this.vxConnection = 0;
+        }
+      } 
+      if(this.x + this.radius >= this.ctx.canvas.width){
+        if(this.vxConnection <= 0 || this.vx <= 0){
+          this.vx = Math.abs(this.vx) * -1;
+          this.x = this.ctx.canvas.width-this.radius;
+        }
+        else{
+          this.vx = 0;
+          this.vxConnection = 0;
+        }
+      } 
+      if(this.y - this.radius < 0) {
+        if(this.vyConnection >= 0 || this.vy >= 0){
+          this.vy = Math.abs(this.vy);
+          this.y = this.radius;
+        }
+        else{
+          this.vy = 0;
+          this.vyConnection = 0;
+        }
+      }
+      if(this.y + this.radius >= this.ctx.canvas.height){
+        if(this.vyConnection <= 0 || this.vy <= 0){
+          this.vy = Math.abs(this.vy) * -1;
+          this.y = this.ctx.canvas.height-this.radius;
+        }
+        else{
+          this.vy = 0;
+          this.vyConnection = 0;
+        }
+      } 
     } else {
       if(this.x - this.radius < 0) {
         this.x = this.radius;
@@ -191,25 +250,9 @@ class neuron{
       }
     }
 
-    this.vx = this.vx  * dampening;
-    this.vy = this.vy  * dampening;
-
-    if(Math.abs(this.vx+this.vy) <= 0.01) {
-      this.vx = 0;
-      this.vy = 0;
-    }
-
-    
-    this.px = this.x;
-    this.py = this.y;
-    this.x = this.x + this.vx + this.vxConnection;
-    this.y = this.y + this.vy + this.vyConnection;
-
+    //Resetting connections force each iteration
     this.vxConnection = 0;
     this.vyConnection = 0;
-
-
-      //console.log(this.vx, this.vy);
   }
 
   alreadyConnected(neuronA, neuronB){
@@ -221,6 +264,15 @@ class neuron{
 
   doOverlap(x1, y1, r1, x2, y2, r2){
     return ((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) <= (r1+r2)*(r1+r2);
+  }
+
+  stopMoving(){
+    //Hard stop if velocity gets very low
+    if(Math.abs(this.vx+this.vy) <= 0.01) {
+      this.vx = 0;
+      this.vy = 0;
+    }
+
   }
 
   draw() {
