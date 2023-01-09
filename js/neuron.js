@@ -115,7 +115,7 @@ class neuron{
         var ClosestPointY = line.startY + t * LineY1;
 
         var distanceLine = Math.sqrt((this.x-ClosestPointX)*(this.x-ClosestPointX)+(this.y-ClosestPointY)*(this.y-ClosestPointY));
-        var distanceLine = Math.sqrt((this.x+this.vx-ClosestPointX)*(this.x+this.vx-ClosestPointX)+(this.y+this.vy-ClosestPointY)*(this.y+this.vy-ClosestPointY));
+        //var distanceLine = Math.sqrt((this.x+this.vx-ClosestPointX)*(this.x+this.vx-ClosestPointX)+(this.y+this.vy-ClosestPointY)*(this.y+this.vy-ClosestPointY));
 
         var lineLength = Math.sqrt((line.endX-line.startX)*(line.endX-line.startX)+(line.endY-line.startY)*(line.endY-line.startY));
         var distanceClosestToEnd = Math.sqrt((ClosestPointX-line.endX)*(ClosestPointX-line.endX)+(ClosestPointY-line.endY)*(ClosestPointY-line.endY));

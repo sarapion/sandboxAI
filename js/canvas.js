@@ -91,19 +91,6 @@ function setPosition(e){
 }
 
 //Preventing Context Menu popup on mouse right click
-window.addEventListener("contextmenu", e => e.preventDefault());
-
-//Preventing control key action
-$(document).keydown(function(event) {
-    if (event.ctrlKey==true && (event.which == '61' || event.which == '107' || event.which == '173' || event.which == '109'  || event.which == '187'  || event.which == '189'  ) ) {
-            event.preventDefault();
-         }
-    });
-document.getElementById('canvas').addEventListener('wheel', event => {
-    if (event.ctrlKey) {
-        event.preventDefault()
-    }
-    }, true)
 
 
 //Checking if Mouse is Hovering Object or not (for circular Objects only)
