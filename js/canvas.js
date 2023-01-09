@@ -11,7 +11,7 @@ var connecting = null;
 var objects = [];
 var lines = [];
 var refreshIntervalId = null;
-const dampening = 0.99;
+const dampening = 0.95;
 var testMenu;
 
 //This is called on tab load once
@@ -29,6 +29,12 @@ window.addEventListener("resize", () => {
         canvas.width = window.innerWidth;
         testMenu.resize();
 });
+
+
+//Eventlisteners
+window.addEventListener('mousemove', setPosition);
+window.addEventListener('touchstart', setPosition);
+document.addEventListener('touchmove', setPosition);
 
 
 //Tracking mouse clocks
@@ -53,6 +59,7 @@ window.addEventListener('mousedown', (e) => {
 window.addEventListener('mouseup', (e) => {
     for (let index = 0; index < objects.length; index++)
         objects[index].hook = false;
+        document.body.style.cursor = 'default';
     hooked = null;
     connecting = null;
     switch (e.button) {
@@ -69,13 +76,19 @@ window.addEventListener('mouseup', (e) => {
     }
 });
 
-//Saving mouse coordinates
-window.addEventListener('mousemove', (e) => {
-    pmouseX = mouseX;
-    pmouseY = mouseY;
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
+
+function setPosition(e){
+    if (e.type == "touchstart" || e.type == "mousedown") {
+        mousedown = true;
+      }
+      if (e.type == "touchstart" || e.type == "touchmove") {
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+      } else {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      }
+}
 
 //Preventing Context Menu popup on mouse right click
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -163,5 +176,6 @@ function update(){
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");  
 ctx.translate(0.5, 0.5);
+//setInterval(update, 1);
 
 update();

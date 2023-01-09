@@ -34,23 +34,16 @@ class neuron{
     if(this.connecting && !mousedownRight){
       this.connecting = false;
       lines.pop();
-      console.log("Test");
     }
 
     //Check if mouse is hovering above Object
     if(hoveringC(this) && mousedown && !mousedownRight){
 
       //Check if Object is already following cursor of not
-      if(canHook(this)  ){
-
+      if(canHook(this)){
         //Attaching Object to Mouse 
-        this.diffX = this.x - mouseX;
-        this.diffY = this.y - mouseY;
-        this.px = this.x;
-        this.py = this.y;
-        this.x = this.x - this.diffX/10;
-        this.y = this.y - this.diffY/10;
         this.hook = true;
+        document.body.style.cursor = 'grabbing';
       } 
 
       //Checking if hovering above Neuron and right Mouse is pressed
@@ -64,16 +57,16 @@ class neuron{
         lines.push(line);
         this.connecting = true;
         this.connection.push(line);
-        console.log("Mouse tracking");
 
       //Line is currently being connected and that lines end is above this Neuron
       }else if(tempLine !== null && !this.connecting){
         if(tempLine.connecting){
           if(!this.alreadyConnected(tempLine.neuron, this)){
-            console.log("Ball tracking");
             tempLine.connecting = false;
             this.connection.push(tempLine);
             tempLine.neuron2 = this;
+            tempLine.endX = this.x;
+            tempLine.endY = this.y;
             tempLine.neuron.connecting = false;
             mousedownRight = false;
           }
@@ -81,11 +74,6 @@ class neuron{
       }
     }
 
-    //Updating Neuron velocity when it's hooked by cursor
-    if(this.hook){
-      this.vx = (this.x-this.px);
-      this.vy = (this.y-this.py);
-    }
 
     //Executing Neuron static collision
     var collisionVector = [];
@@ -113,36 +101,53 @@ class neuron{
     //Calculating and executing Neuron collisions with connection edges (Many Bugs; Alot TODO)
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      var LineX1 = line.endX - line.startX;
-      var LineY1 = line.endY - line.startY;
+      if(!this.menuMember && line.neuron !== this && line.neuron2 !== this){
+        var LineX1 = line.endX - line.startX;
+        var LineY1 = line.endY - line.startY;
 
-      var LineX2 = this.x - line.startX;
-      var LineY2 = this.y - line.startY;
+        var LineX2 = this.x - line.startX;
+        var LineY2 = this.y - line.startY;
 
-      var Edgelength = LineX1 * LineX1 + LineY1 * LineY1;
-      var t = Math.max(0, Math.min(Edgelength , LineX2 * LineX1 + LineY1 * LineY2))/Edgelength;
+        var Edgelength = LineX1 * LineX1 + LineY1 * LineY1;
+        var t = Math.max(0, Math.min(Edgelength , LineX2 * LineX1 + LineY1 * LineY2))/Edgelength;
 
-      var ClosestPointX = line.startX + t * LineX1;
-      var ClosestPointY = line.startY + t * LineY1;
+        var ClosestPointX = line.startX + t * LineX1;
+        var ClosestPointY = line.startY + t * LineY1;
 
-      var distanceLine = Math.sqrt((this.x-ClosestPointX)*(this.x-ClosestPointX)+(this.y-ClosestPointY)*(this.y-ClosestPointY));
+        var distanceLine = Math.sqrt((this.x-ClosestPointX)*(this.x-ClosestPointX)+(this.y-ClosestPointY)*(this.y-ClosestPointY));
+        var distanceLine = Math.sqrt((this.x+this.vx-ClosestPointX)*(this.x+this.vx-ClosestPointX)+(this.y+this.vy-ClosestPointY)*(this.y+this.vy-ClosestPointY));
 
-      var nxClose = (ClosestPointX - this.x)/distanceLine;
-      var nyClose = (ClosestPointY - this.y)/distanceLine;
+        var lineLength = Math.sqrt((line.endX-line.startX)*(line.endX-line.startX)+(line.endY-line.startY)*(line.endY-line.startY));
+        var distanceClosestToEnd = Math.sqrt((ClosestPointX-line.endX)*(ClosestPointX-line.endX)+(ClosestPointY-line.endY)*(ClosestPointY-line.endY));
+        var distanceClosestToStart = Math.sqrt((ClosestPointX-line.startX)*(ClosestPointX-line.startX)+(ClosestPointY-line.startY)*(ClosestPointY-line.startY));
 
-      if(distanceLine <= this.radius+5 && line.neuron !== this && line.neuron2 !== this && !line.neuron.connecting){
+        var neuron2_factor = distanceClosestToStart/lineLength;
+        var neuron1_factor = distanceClosestToEnd/lineLength;
 
-          this.x = this.x - nxClose*(this.radius-distanceLine+5);
-          this.y = this.y - nyClose*(this.radius-distanceLine+5);
-          line.neuron.x = line.neuron.x + nxClose*(this.radius-distanceLine+5);
-          line.neuron.y = line.neuron.y + nyClose*(this.radius-distanceLine+5);
-          line.neuron2.x = line.neuron2.x + nxClose*(this.radius-distanceLine+5);
-          line.neuron2.y = line.neuron2.y + nyClose*(this.radius-distanceLine+5);
-          line.startX = line.startX + nxClose*(this.radius-distanceLine+5);
-          line.startY = line.startY + nyClose*(this.radius-distanceLine+5);
-          line.endX = line.endX + nxClose*(this.radius-distanceLine+5);
-          line.endY = line.endY + nyClose*(this.radius-distanceLine+5);
-        
+        //console.log(distanceClosestToEnd, distanceClosestToStart, Math.sqrt((line.endX-line.startX)*(line.endX-line.startX)+(line.endY-line.startY)*(line.endY-line.startY)))
+     
+
+        var nxClose = (ClosestPointX - this.x)/distanceLine;
+        var nyClose = (ClosestPointY - this.y)/distanceLine;
+
+        if(distanceLine <= this.radius+5 && line.neuron !== this && line.neuron2 !== this && !line.neuron.connecting && this.hook){
+
+            //this.x = this.x - nxClose*(this.radius-distanceLine);
+            //this.y = this.y - nyClose*(this.radius-distanceLine);
+            line.neuron.x = line.neuron.x + nxClose*(this.radius-distanceLine+5)*neuron1_factor;
+            line.neuron.y = line.neuron.y + nyClose*(this.radius-distanceLine+5)*neuron1_factor;
+            //line.neuron.vx = this.vx * -nxClose;
+            //line.neuron.vy = this.vy * -nyClose;
+            line.neuron2.x = line.neuron2.x + nxClose*(this.radius-distanceLine+5)*neuron2_factor;
+            line.neuron2.y = line.neuron2.y + nyClose*(this.radius-distanceLine+5)*neuron2_factor;
+            //line.neuron2.vx = this.vx * -nxClose;
+            //line.neuron2.vy = this.vy * -nyClose;
+            //line.startX = line.startX + nxClose*(this.radius-distanceLine+5);
+            //line.startY = line.startY + nyClose*(this.radius-distanceLine+5);
+            //ine.endX = line.endX + nxClose*(this.radius-distanceLine+5);
+            //line.endY = line.endY + nyClose*(this.radius-distanceLine+5);
+          
+        }
       }
     }
 
@@ -177,17 +182,33 @@ class neuron{
     }
     
     
-    //Adding friction
-    this.vx = this.vx  * dampening;
-    this.vy = this.vy  * dampening;
+    //Updating Neuron velocity when it's hooked by cursor
+    if(this.hook){
+      this.diffX = this.x - mouseX;
+      this.diffY = this.y - mouseY;
+      this.px = this.x;
+      this.py = this.y;
+      this.x = this.x - this.diffX/15;
+      this.y = this.y - this.diffY/15;
 
-    stopMoving();
+      this.vx = this.x - this.px;
+      this.vy = this.y - this.py;
 
-    //Changing object position depending on its velocity and the push/pull from connections
-    this.px = this.x;
-    this.py = this.y;
-    this.x = this.x + this.vx + this.vxConnection;
-    this.y = this.y + this.vy + this.vyConnection;
+      
+    } else{    
+      //Adding friction
+      this.vx = this.vx  * dampening;
+      this.vy = this.vy  * dampening;
+
+      //Changing object position depending on its velocity and the push/pull from connections
+      this.px = this.x;
+      this.py = this.y;
+      this.x = this.x + this.vx + this.vxConnection;
+      this.y = this.y + this.vy + this.vyConnection;
+    }
+
+    this.stopMoving();
+
 
     //Making the Objects bounce off window edges and not fly out
     if(!this.hook){
@@ -253,6 +274,14 @@ class neuron{
     //Resetting connections force each iteration
     this.vxConnection = 0;
     this.vyConnection = 0;
+  }
+
+
+
+
+
+  collision(distance, ClosestPointX, ClosestPointY){
+    return distanceLine <= this.radius+5
   }
 
   alreadyConnected(neuronA, neuronB){
