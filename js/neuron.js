@@ -17,7 +17,7 @@ class neuron{
     this.ay = 0;
     this.hook = false;
     this.pushed = false;
-    this.radius = 20;
+    this.radius = 200;
     this.mass = this.radius;
     this.dist = 0;
     this.normVX = 0;
