@@ -3,6 +3,7 @@ class menu{
     constructor(ctx){
         this.ctx = ctx;
         this.neuron = new neuron(ctx, ctx.canvas.width*0.95, ctx.canvas.height*0.8);
+        this.pseudoConnection = false;
         this.originalX = ctx.canvas.width*0.95;
         this.originalY = ctx.canvas.height*0.8;
 
@@ -38,5 +39,9 @@ class menu{
         //Updating positions on window resize
         this.originalX = ctx.canvas.width*0.95;
         this.originalY = ctx.canvas.height*0.8;
+    }
+
+    draw(){
+        this.refresh();
     }
 }

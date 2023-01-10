@@ -6,6 +6,8 @@ class connection {
       this.neuron2 = null;
       this.startX = neuron.x;
       this.startY = neuron.y;
+      this.arrowScaleLength = 15;
+      this.arrowScaleWidth = 0;
       this.endX = x;
       this.endY = y;
       this.nX = 0;
@@ -13,10 +15,6 @@ class connection {
       this.dist = 0;
       this.setLength = 255;
       this.connecting = false;
-    }
-
-    //Determining where to draw the end of the connection
-    newStartEnd(x, y){
     }
 
     //Updating the start and end positions of the connection
@@ -42,8 +40,8 @@ class connection {
         this.endX = x;
         this.endY = y;
       }else{
-        this.endX = this.neuron2.x-this.nX*20;
-        this.endY = this.neuron2.y-this.nY*20;
+        this.endX = this.neuron2.x-this.nX*(this.neuron2.radius+this.arrowScaleLength);
+        this.endY = this.neuron2.y-this.nY*(this.neuron2.radius+this.arrowScaleLength);
       }
 
       //Transfer calculated force vectors onto connected neurons/objects
@@ -61,19 +59,20 @@ class connection {
     draw(){
       //this.newStartEnd(mouseX, mouseY);
       this.ctx.fillStyle = "black";
-      //this.ctx.lineCap = "round";
+      this.ctx.lineCap = "round";
       this.ctx.beginPath();
       this.ctx.moveTo(this.startX, this.startY);
       this.ctx.lineTo(this.endX, this.endY);
-      this.ctx.lineWidth=Math.min(Math.max(600/this.dist, 1), 20);
+      this.ctx.lineWidth=Math.min(Math.max(600/this.dist, 5), 15);
       this.ctx.stroke();
-      var scale = 30;
-      var tempx = this.endX-scale*this.nX;
-      var tempy = this.endY-scale*this.nY;
-      this.ctx.moveTo(tempx, tempy);
-      this.ctx.lineTo(tempx+scale/3*this.nY, tempy-scale/3*this.nX);
-      this.ctx.lineTo(this.endX+scale/10*this.nX, this.endY+scale/10*this.nY);
+      console.log(this.ctx.lineWidth);
+      this.arrowScaleWidth = this.ctx.lineWidth+5;
+      this.ctx.moveTo(this.endX+this.arrowScaleLength*this.nX, this.endY+this.arrowScaleLength*this.nY);
+      this.ctx.lineTo(this.endX+this.arrowScaleWidth*this.nY, this.endY-this.arrowScaleWidth*this.nX);
+      this.ctx.lineTo(this.endX-this.arrowScaleWidth*this.nY, this.endY+this.arrowScaleWidth*this.nX);
+      this.ctx.lineTo(this.endX+this.arrowScaleLength*this.nX, this.endY+this.arrowScaleLength*this.nY);
       this.ctx.fill();
     }
 
+     
 }

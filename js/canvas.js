@@ -154,7 +154,7 @@ function update(){
         }
         
         objects[i].draw();
-        testMenu.refresh();
+        testMenu.draw();
     }
     requestAnimationFrame(update);
 }
