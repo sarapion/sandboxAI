@@ -130,7 +130,7 @@ class neuron{
         var nxClose = (ClosestPointX - this.x)/distanceLine;
         var nyClose = (ClosestPointY - this.y)/distanceLine;
 
-        if(distanceLine <= this.radius+5 && line.neuron !== this && line.neuron2 !== this && !line.neuron.connecting && this.hook){
+        if(distanceLine <= this.radius+5 && line.neuron !== this && line.neuron2 !== this && !line.neuron.connecting ){
 
             //this.x = this.x - nxClose*(this.radius-distanceLine);
             //this.y = this.y - nyClose*(this.radius-distanceLine);
